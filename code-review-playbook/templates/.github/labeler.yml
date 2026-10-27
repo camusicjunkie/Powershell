@@ -1,0 +1,28 @@
+# Risk tier is decided by what the change touches, not by who wrote it.
+# Used by .github/workflows/risk-label.yml (actions/labeler v5 syntax).
+# Adjust the globs to this repo.
+
+risk:high:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - '.claude/**'
+          - 'CODEOWNERS'
+          - '**/auth/**'
+          - '**/billing/**'
+          - '**/install*'
+          - '**/update*'
+          - '**/release*'
+          - '**/migrations/**'
+          - '**/*.tf'
+
+risk:low:
+  - changed-files:
+      - all-globs-to-all-files:
+          - '{**/*.md,docs/**,**/*.txt,LICENSE}'
+
+# Any PR that isn't docs-only. A high-risk PR also gets this label;
+# when a PR has more than one risk label, the highest tier applies.
+risk:medium:
+  - changed-files:
+      - any-glob-to-any-file: '!{**/*.md,docs/**,**/*.txt,LICENSE}'

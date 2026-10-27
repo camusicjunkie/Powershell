@@ -1,0 +1,33 @@
+name: Security Review
+
+# Open-source Claude Code security review action.
+# Make "security-review" a required status check, and turn on
+# "Require conversation resolution before merging" so open findings block the merge.
+# Needs a repository secret: ANTHROPIC_API_KEY. Pin the action to a commit SHA you have checked.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: security-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+
+      - uses: anthropics/claude-code-security-review@main
+        with:
+          comment-pr: true
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

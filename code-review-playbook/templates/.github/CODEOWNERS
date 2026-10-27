@@ -1,0 +1,16 @@
+# Humans who must approve changes to these paths.
+# Turn on "Require review from Code Owners" in the branch ruleset for this to take effect.
+# Later rules override earlier ones, so keep the default first.
+
+*                       @{{OWNER}}
+
+# Always human-owned: CI, release and review configuration
+/.github/               @{{OWNER}}
+/CODEOWNERS             @{{OWNER}}
+/REVIEW.md              @{{OWNER}}
+/.claude/               @{{OWNER}}
+
+# High-risk areas: adjust to this repo
+# /src/auth/            @{{OWNER}}
+# /src/billing/         @{{OWNER}}
+# /installer/           @{{OWNER}}
