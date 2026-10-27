@@ -1,0 +1,59 @@
+# AI code review, security review and risk tiers for merge requests.
+#
+# Include it from .gitlab-ci.yml:
+#   include:
+#     - local: .gitlab/ci/claude-review.gitlab-ci.yml
+#
+# CI/CD variables (Settings > CI/CD > Variables). Mark them Masked but NOT Protected,
+# because merge request pipelines run on unprotected branches:
+#   ANTHROPIC_API_KEY     Claude API key
+#   GITLAB_REVIEW_TOKEN   project access token (or a bot user's PAT), role Developer, scope api
+# Optional:
+#   AUTO_MERGE_LOW_RISK=true   auto-merge low-risk MRs from trusted authors (playbook Phase 6)
+#   TRUSTED_ACCESS_LEVEL       minimum author role for auto-merge (default 30 = Developer)
+#   REVIEW_MAX_ROUNDS          rounds before only Important findings are reported (default 3)
+#   CLAUDE_MODEL               model for the reviewer (default: Claude Code's default)
+#
+# The jobs are allow_failure so a reviewer outage never blocks merging. The unresolved
+# threads they open are what block it ("All threads must be resolved").
+
+.mr-only:
+  stage: test
+  interruptible: true
+  needs: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+.claude-reviewer:
+  extends: .mr-only
+  image: node:22-alpine
+  variables:
+    GIT_DEPTH: "0"
+  before_script:
+    - apk add --no-cache git python3 >/dev/null
+    - npm install -g --silent @anthropic-ai/claude-code
+  allow_failure: true
+  timeout: 45m
+
+claude-code-review:
+  extends: .claude-reviewer
+  script:
+    - python3 .gitlab/ci/scripts/claude_review.py code
+
+claude-security-review:
+  extends: .claude-reviewer
+  script:
+    - python3 .gitlab/ci/scripts/claude_review.py security
+
+risk-tier:
+  extends: .mr-only
+  image: python:3.12-alpine
+  allow_failure: true
+  script:
+    - python3 .gitlab/ci/scripts/risk_tier.py
+
+# GitLab's own scanners are available on every tier. Uncomment to add them.
+# On Ultimate their findings also show in the MR security widget.
+# include:
+#   - template: Jobs/SAST.gitlab-ci.yml
+#   - template: Jobs/Secret-Detection.gitlab-ci.yml

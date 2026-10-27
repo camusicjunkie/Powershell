@@ -1,0 +1,27 @@
+# Risk tiers for merge requests, used by .gitlab/ci/scripts/risk_tier.py.
+# The tier comes from what the change touches, not from who wrote it.
+# Globs are relative to the repo root: ** spans folders, * stays inside one folder.
+# Start strict; widen [low] only after a few weeks of evidence (no reverts).
+
+[high]
+# Any changed file matching one of these makes the MR risk::high.
+.gitlab-ci.yml
+.gitlab/**
+.claude/**
+CODEOWNERS
+**/auth/**
+**/billing/**
+**/install*
+**/update*
+**/release*
+**/migrations/**
+**/*.tf
+
+[low]
+# The MR is risk::low only if EVERY changed file matches one of these.
+**/*.md
+docs/**
+**/*.txt
+LICENSE
+
+# Everything else is risk::medium.

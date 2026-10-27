@@ -5,6 +5,10 @@ Addy Osmani's write-up *"How the Claude Code team does code review"*. Drop it
 into any repository, current or future, with `Install-ReviewKit.ps1`, then work
 through the phases below.
 
+**Using GitLab?** The phases are the same. The file names, settings and tier
+requirements that differ are in **[GITLAB.md](GITLAB.md)**. The GitHub-specific
+steps below apply to GitHub repos.
+
 ## The idea in one paragraph
 
 You don't stop reviewing code. You move most of the reading to automation and
@@ -32,11 +36,13 @@ guardrail. If reverts go up, you haven't saved time, you've only moved it.
 ```powershell
 # From a clone of this repo; works with Windows PowerShell 5.1 or PowerShell 7+
 ./code-review-playbook/Install-ReviewKit.ps1 -Path ../my-project -Owner my-github-handle
+# GitLab: add -Platform GitLab (it is detected automatically when it can be)
 ```
 
-It copies the templates below into the target repo and **never overwrites**
-existing files unless you pass `-Force`. Files it skipped are listed so you can
-merge them by hand.
+It copies `templates/common` plus `templates/github` or `templates/gitlab` into
+the target repo, and **never overwrites** existing files unless you pass
+`-Force`. Files it skipped are listed so you can merge them by hand. The table
+below covers GitHub; see GITLAB.md for the GitLab files.
 
 | File | Purpose |
 | --- | --- |

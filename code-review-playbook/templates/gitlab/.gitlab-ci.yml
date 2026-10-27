@@ -1,0 +1,22 @@
+# Installed by the code review kit only because this project had no .gitlab-ci.yml.
+
+# Run merge request pipelines when an MR is open, and branch pipelines otherwise.
+# Without this, MR-only jobs land in a separate pipeline, and "Pipelines must succeed"
+# could pass while your branch pipeline's tests fail.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+include:
+  - local: .gitlab/ci/claude-review.gitlab-ci.yml
+
+# Add your blocking checks here: lint, typecheck, tests on every platform, build.
+# These must NOT be allow_failure, so "Pipelines must succeed" can block merging.
+# test:
+#   stage: test
+#   image: <image>
+#   script:
+#     - <your test command>

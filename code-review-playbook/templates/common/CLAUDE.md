@@ -29,8 +29,8 @@ for anything touching input handling, auth, secrets or CI) before opening a PR.
 
 ## Pull requests
 - Keep PRs small and single-purpose.
-- Fill in every section of the PR template, including **How to revert**.
-- Changes to paths labelled `risk:high` (see `.github/labeler.yml`) need a human code owner's review.
+- Fill in every section of the PR/MR template, including **How to revert**.
+- Changes to the high-risk areas listed in `REVIEW.md` need a human code owner's review.
 
 ## More docs
 - `REVIEW.md`: what reviewers focus on

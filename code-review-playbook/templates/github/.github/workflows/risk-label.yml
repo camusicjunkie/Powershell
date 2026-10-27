@@ -32,3 +32,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: gh pr merge --auto --squash "$PR_URL"
+
+      # A later push can turn a docs-only PR into a code change: take back the
+      # auto-merge this workflow set (never one a person turned on).
+      - name: Turn off auto-merge if the PR is no longer low-risk
+        if: >-
+          github.event.pull_request.auto_merge.enabled_by.login == 'github-actions[bot]' && (
+            !contains(steps.labeler.outputs.all-labels, 'risk:low') ||
+            contains(steps.labeler.outputs.all-labels, 'risk:medium') ||
+            contains(steps.labeler.outputs.all-labels, 'risk:high'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --disable-auto "$PR_URL"

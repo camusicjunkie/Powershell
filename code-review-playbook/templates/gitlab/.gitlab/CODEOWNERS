@@ -1,0 +1,19 @@
+# Humans who must approve changes to these paths.
+# Code Owners needs GitLab Premium or Ultimate. To enforce it, turn on
+# "Code owner approval" for the default branch in Settings > Repository > Protected branches.
+# A [Section][N] header means N approvals from that section's owners are required.
+
+[Default]
+* @{{OWNER}}
+
+# Always human-owned: CI, release and review configuration
+[CI and review config][1]
+/.gitlab-ci.yml @{{OWNER}}
+/.gitlab/ @{{OWNER}}
+/.claude/ @{{OWNER}}
+/REVIEW.md @{{OWNER}}
+
+# High-risk areas: adjust to this repo
+# [Auth and billing][1]
+# /src/auth/ @{{OWNER}}
+# /src/billing/ @{{OWNER}}
