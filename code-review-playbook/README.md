@@ -44,7 +44,7 @@ merge them by hand.
 | `REVIEW.md` | What the reviewer should care about and ignore, and its output format. |
 | `.github/pull_request_template.md` | Testing / Risk / How to revert. |
 | `.github/CODEOWNERS` | Humans who must approve sensitive paths. |
-| `.github/labeler.yml` + `workflows/risk-label.yml` | Labels each PR with a risk tier based on the files it changes. |
+| `.github/labeler.yml` + `workflows/risk-label.yml` | Labels each PR with a risk tier based on the files it changes; can auto-merge low-risk PRs (off by default). |
 | `.github/workflows/claude-code-review.yml` | AI review on every PR, with a cap on review rounds. |
 | `.github/workflows/security-review.yml` | Automated security review. |
 | `.claude/settings.json` + `.claude/hooks/format-on-edit.sh` | Runs the formatter and linter every time the agent edits a file. |
@@ -171,17 +171,44 @@ your own PR. Use this variant:
    `docs/review-evals/incidents.md` with the bad PR, the fix, the exact
    file:line of the bug, and the layer that *should* have caught it.
 2. **Re-score the reviewer** against that set every time you change
-   `REVIEW.md`, the workflow prompt or its tools. Did it now catch the known
-   bugs?
-3. **Measure noise:** tally each AI comment's outcome (fixed / rejected /
+   `REVIEW.md`, the workflow prompt, its tools **or the model**. Did it now
+   catch the known bugs?
+3. **For every miss, ask what wasn't in the model's context,** and turn the
+   answer into something permanent: a line in `CLAUDE.md` or `REVIEW.md`, a
+   skill, a lint rule or a new CI check. Record it in the log's *Fixed at
+   source by* column.
+4. **Measure noise:** tally each AI comment's outcome (fixed / rejected /
    intentional / didn't matter), and occasionally run the reviewer on
    known-clean PRs. A finding an agent author has to act on costs a whole
    commit and review cycle, so false positives are more expensive than they
    look.
-4. **Priorities:** first catch real bugs, second reduce the number of review
+5. **Priorities:** first catch real bugs, second reduce the number of review
    rounds.
-5. **Optionally**, run the reviewer on the whole codebase on a schedule
+6. **Track human effort** (approvals, comments and wait time per PR) against
+   the revert and incident rates every month. The goal never changes: less
+   human effort per change, with the revert rate no higher than it is now.
+7. **Optionally**, run the reviewer on the whole codebase on a schedule
    (nightly or weekly) to find old bugs before new code copies them.
+
+## Phase 6: Auto-merge low-risk changes (only once you have the evidence)
+
+The next step after Phase 5: the owner decides which low-risk changes can
+merge on their own once every automated check passes. Turn it on only after
+`risk:low` PRs have gone a few weeks with no reverts.
+
+The kit's `risk-label` workflow can do this, but it is **off by default**:
+
+1. Repo Settings → General → turn on **Allow auto-merge**.
+2. Settings → Secrets and variables → Actions → **Variables** → add
+   `AUTO_MERGE_LOW_RISK` = `true`.
+
+After that, a PR that is *only* `risk:low` (docs-only) and was opened by an
+owner, member or collaborator gets auto-merge (squash) turned on. GitHub still
+waits for every required check and for every conversation to be resolved. If
+your ruleset requires an approval, it also waits for that, so a human stays in
+the loop until you decide otherwise. Delete the variable to switch it off.
+Widen the definition of `risk:low` in `labeler.yml` only as the evidence
+supports it.
 
 ## Where humans stay in the loop
 
@@ -214,3 +241,4 @@ It takes minutes and is always up to date.
 - [ ] Branch ruleset: stale-approval dismissal, conversation resolution, code owners
 - [ ] Merge queue (org repos) / feature flags / staged release where it applies
 - [ ] `incidents.md` started; review the metrics monthly
+- [ ] Later, with evidence: turn on low-risk auto-merge (Phase 6)
